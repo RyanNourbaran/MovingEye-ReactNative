@@ -4,10 +4,11 @@ import { Container, Header, Content, Form, Item, Input } from "native-base";
 
 const styles = StyleSheet.create({
   eyeball: {
-    width: 100,
+    width: 150,
     height: 75,
     borderWidth: 1,
-    borderRadius: 50
+    borderRadius: 50,
+    marginLeft: 10
   }
 });
 export default class CoolLogin extends Component {
@@ -19,42 +20,35 @@ export default class CoolLogin extends Component {
     this.spinValue = new Animated.Value(0);
   }
 
-  userChange() {
+  userKeyPress = function(e) {
     //add a way to make the aniation in sequence not parralel
     let oldVal = this.state.eyeBallLeftMargin;
     console.log(oldVal);
+    let changeVal = 0.01;
+    const maxVal = 0.32;
+    const minVal = 0;
 
-    if (oldVal < 1) {
+    if (e.nativeEvent.key == "Backspace") {
+      changeVal *= -1;
+    }
+
+    //set the new val even if it's reached the end
+    const newVal = oldVal + changeVal;
+    this.setState({
+      eyeBallLeftMargin: newVal
+    });
+
+    //either (old value is below max and increasing) OR (old value above min and decreasing)
+    if (oldVal < maxVal && oldVal >= minVal) {
       Animated.timing(this.spinValue, {
-        toValue: 0.03 + oldVal,
+        toValue: newVal,
         duration: 400,
         easing: Easing.linear
-      }).start(
-        this.setState({
-          eyeBallLeftMargin: oldVal + 0.03
-        })
-      );
+      }).start();
     }
-  }
-  userBackSpace() {
-    //add a way to make the aniation in sequence not parralel
-    let oldVal = this.state.eyeBallLeftMargin;
-    console.log(oldVal);
-
-    if (oldVal < 1) {
-      Animated.timing(this.spinValue, {
-        toValue: 0.03 + oldVal,
-        duration: 400,
-        easing: Easing.linear
-      }).start(
-        this.setState({
-          eyeBallLeftMargin: oldVal + 0.03
-        })
-      );
-    }
-  }
-  passChange() {
-    console.log("password changed");
+  };
+  passChange(e) {
+    console.log(e);
   }
   render() {
     let { eyeBallLeftPosition } = this.state;
@@ -83,7 +77,11 @@ export default class CoolLogin extends Component {
           </View>
           <Form>
             <Item>
-              <Input placeholder="Username" onChangeText={this.userChange.bind(this)} />
+              <Input
+                placeholder="Username"
+                keyboardType="default"
+                onKeyPress={this.userKeyPress.bind(this)}
+              />
             </Item>
             <Item last>
               <Input placeholder="Password" onChangeText={this.passChange.bind(this)} />
